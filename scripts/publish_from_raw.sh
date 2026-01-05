@@ -26,7 +26,11 @@ if [[ ! -d "${RAW_DIR}" ]]; then
   exit 1
 fi
 
-mapfile -t RAW_FILES < <(find "${RAW_DIR}" -maxdepth 1 -type f -name "*.zip" -print | sort)
+RAW_FILES=()
+while IFS= read -r raw_file; do
+  [[ -n "${raw_file}" ]] || continue
+  RAW_FILES+=("${raw_file}")
+done < <(find "${RAW_DIR}" -maxdepth 1 -type f -name "*.zip" -print | sort)
 if [[ ${#RAW_FILES[@]} -eq 0 ]]; then
   echo "No raw .zip artifacts found in ${RAW_DIR}"
   exit 0
