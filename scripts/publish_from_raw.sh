@@ -110,9 +110,11 @@ for raw_zip in "${RAW_FILES[@]}"; do
   printf "%s" "${SPARKLE_ED25519_PRIVATE_KEY}" > "${key_file}"
   chmod 600 "${key_file}"
 
-  signature="$("${SIGN_UPDATE_BIN}" --ed-key-file "${key_file}" "${update_zip}" 2>/dev/null | tr -d '\n')"
+  sign_output="$("${SIGN_UPDATE_BIN}" --ed-key-file "${key_file}" "${update_zip}" 2>/dev/null | tr -d '\n')"
+  signature="$(echo "${sign_output}" | sed -n 's/.*sparkle:edSignature=\"\\([^\"]*\\)\".*/\\1/p')"
   if [[ -z "${signature}" ]]; then
     echo "Failed to compute Sparkle signature for: ${update_zip}" >&2
+    echo "sign_update output: ${sign_output}" >&2
     rm -rf "${tmpdir}"
     exit 1
   fi

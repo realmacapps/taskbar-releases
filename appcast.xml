@@ -18,7 +18,7 @@
         sparkle:version="1"
         sparkle:shortVersionString="0.1.0"
         sparkle:minimumSystemVersion="15.0"
-        sparkle:edSignature="sparkle:edSignature=&quot;kGW31N+MyWl/tRki/khZPOKrtAvtUNEKYrlzGWMRcQY14YbXQGlIw1odHnbi4D5o5FnhoW05PyScCne32wbsBA==&quot; length=&quot;4326673&quot;" />
+        sparkle:edSignature="kGW31N+MyWl/tRki/khZPOKrtAvtUNEKYrlzGWMRcQY14YbXQGlIw1odHnbi4D5o5FnhoW05PyScCne32wbsBA==" />
     </item>
 
   </channel>
