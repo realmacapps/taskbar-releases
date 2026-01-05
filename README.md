@@ -8,12 +8,21 @@ This repository hosts the public update feed (`appcast.xml`) for RealTaskBar usi
 
 ## Publishing a release (zip for Sparkle)
 
-High-level steps:
+This repo is designed to fully automate publishing via GitHub Actions.
 
-1. Build a signed Release build (Developer ID), notarize it, and staple the ticket.
-2. Create a `.zip` update archive from the `.app` (Sparkle-friendly zip).
-3. Upload the `.zip` as a GitHub Release asset.
-4. Update `appcast.xml` with a new `<item>` entry including:
-   - `sparkle:version` (CFBundleVersion)
-   - `sparkle:shortVersionString` (CFBundleShortVersionString)
-   - `sparkle:edSignature` + `length` (from Sparkle `sign_update`)
+### One-time setup
+
+1. Add repository secret `SPARKLE_ED25519_PRIVATE_KEY` (Settings → Secrets and variables → Actions).
+   - Must match the public key embedded in the app’s `Info.plist` as `SUPublicEDKey`.
+
+### Publish flow (fully automated)
+
+1. Put a raw artifact zip into `releases/raw/`.
+   - Supported: a `.zip` containing `RealTaskBar.app` OR a `.zip` containing a `.xcarchive` with `Products/Applications/*.app`.
+2. Commit + push to `main` (or use `./scripts/submit_raw.sh /path/to/raw.zip`).
+
+GitHub Actions will:
+- Extract the `.app`, build a Sparkle-friendly update `.zip` and a `.dmg` (for website downloads).
+- Sign the update zip with Sparkle `sign_update` (Ed25519).
+- Create/update a GitHub Release tag `v<shortVersion>-<build>`, upload assets.
+- Update `appcast.xml` and remove the raw artifact from the repo.
