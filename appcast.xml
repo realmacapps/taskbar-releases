@@ -8,6 +8,20 @@
     <description>RealTaskBar (macOS) Sparkle appcast</description>
     <language>en</language>
 
+
+    <item>
+      <title>RealTaskBar 1.0.8 (8)</title>
+      <sparkle:releaseNotesLink>https://github.com/realmacapps/taskbar-releases/releases/tag/v1.0.8-8</sparkle:releaseNotesLink>
+      <pubDate>Tue, 06 Jan 2026 13:27:48 +0000</pubDate>
+      <enclosure url="https://github.com/realmacapps/taskbar-releases/releases/download/v1.0.8-8/RealTaskBar-1.0.8-8.zip"
+        length="4388880"
+        type="application/octet-stream"
+        sparkle:version="8"
+        sparkle:shortVersionString="1.0.8"
+        sparkle:minimumSystemVersion="15.0"
+        sparkle:edSignature="EJ4QkWk+cIH2LvQTMKqDpqpUHVGrp0yH2XovSugSPy9cDw5APPbMyQYfmKbPgZxSCPzLNr+MmoKhOPA7ZxoVAQ==" />
+    </item>
+
     <item>
       <title>RealTaskBar 0.1.0 (1)</title>
       <sparkle:releaseNotesLink>https://github.com/realmacapps/taskbar-releases/releases/tag/v0.1.0-1</sparkle:releaseNotesLink>
