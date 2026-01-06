@@ -99,6 +99,50 @@ for raw_zip in "${RAW_FILES[@]}"; do
   tag="v${short_version}-${build_version}"
   title="${app_name} ${short_version} (${build_version})"
   notes="Build ${build_version}"
+  notes_file=""
+  release_notes_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${tag}"
+
+  changelog_path="$(find "${extracted_dir}" -maxdepth 2 -type f -iname "changelog.md" -print -quit)"
+  if [[ -n "${changelog_path}" ]]; then
+    notes_file="${tmpdir}/release-notes.md"
+    cp "${changelog_path}" "${notes_file}"
+    notes="Release notes from changelog.md"
+
+    if rendered_html="$(gh api -X POST /markdown -f text=@"${notes_file}" -f mode=gfm 2>/dev/null)"; then
+      notes_dir="${ROOT_DIR}/notes"
+      mkdir -p "${notes_dir}"
+      notes_page="${notes_dir}/${tag}.html"
+      cat > "${notes_page}" <<HTML
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${title} – Release Notes</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; margin: 24px; }
+      h1, h2, h3 { line-height: 1.2; }
+      .markdown-body { max-width: 820px; margin: 0 auto; }
+      pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      pre { padding: 12px; border-radius: 8px; overflow: auto; background: rgba(0,0,0,0.06); }
+    </style>
+  </head>
+  <body>
+    <div class="markdown-body">
+      ${rendered_html}
+    </div>
+  </body>
+</html>
+HTML
+      git add "${notes_page}"
+      owner="${GITHUB_REPOSITORY%/*}"
+      repo="${GITHUB_REPOSITORY#*/}"
+      release_notes_url="https://${owner}.github.io/${repo}/notes/${tag}.html"
+    else
+      echo "Warning: failed to render changelog.md via GitHub API; falling back to release page." >&2
+    fi
+  fi
 
   update_zip="${tmpdir}/${safe_app_name}-${short_version}-${build_version}.zip"
   dmg_path="${tmpdir}/${safe_app_name}-${short_version}-${build_version}.dmg"
@@ -126,15 +170,19 @@ for raw_zip in "${RAW_FILES[@]}"; do
   length="$(stat -f%z "${update_zip}")"
   pub_date="$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S %z')"
 
+  notes_args=(--notes "${notes}")
+  if [[ -n "${notes_file}" ]]; then
+    notes_args=(--notes-file "${notes_file}")
+  fi
+
   if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
     gh release upload "${tag}" "${update_zip}" "${dmg_path}" --clobber --repo "${GITHUB_REPOSITORY}"
-    gh release edit "${tag}" --title "${title}" --notes "${notes}" --repo "${GITHUB_REPOSITORY}"
+    gh release edit "${tag}" --title "${title}" "${notes_args[@]}" --repo "${GITHUB_REPOSITORY}"
   else
-    gh release create "${tag}" "${update_zip}" "${dmg_path}" --title "${title}" --notes "${notes}" --latest --repo "${GITHUB_REPOSITORY}"
+    gh release create "${tag}" "${update_zip}" "${dmg_path}" --title "${title}" "${notes_args[@]}" --latest --repo "${GITHUB_REPOSITORY}"
   fi
 
   download_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/$(basename "${update_zip}")"
-  release_notes_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${tag}"
 
   ruby "${ROOT_DIR}/scripts/update_appcast.rb" \
     --appcast "${ROOT_DIR}/appcast.xml" \
